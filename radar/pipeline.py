@@ -130,6 +130,7 @@ def _fetch_all(cfg: dict, watchlist: Watchlist) -> tuple[list[Job], dict]:
 
 def _merge(store: Store, fetched: list[Job], health: dict, watchlist: Watchlist) -> tuple[list[Job], set[str]]:
     now = iso_now()
+    today = now[:10]  # date granularity, so unchanged postings do not churn the state file hourly
     seen_ids: set[str] = set()
     new_jobs: list[Job] = []
     for job in fetched:
@@ -141,7 +142,7 @@ def _merge(store: Store, fetched: list[Job], health: dict, watchlist: Watchlist)
         existing = store.get(job.id)
         if existing is None:
             job.first_seen = now
-            job.last_seen = now
+            job.last_seen = today
             store.put(job)
             new_jobs.append(job)
             continue
@@ -164,7 +165,7 @@ def _merge(store: Store, fetched: list[Job], health: dict, watchlist: Watchlist)
         merged_meta["sources"] = sorted(srcs)
         existing.meta = merged_meta
         existing.description = job.description or existing.description
-        existing.last_seen = now
+        existing.last_seen = today
         existing.active = True
         if match:
             existing.tier = match["tier"]

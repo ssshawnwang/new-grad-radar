@@ -41,12 +41,11 @@ def export(jobs: list[Job], health: dict, stats: dict, out_dir: str | Path = "do
     out.mkdir(parents=True, exist_ok=True)
     visible = [j for j in jobs if j.active and (j.prefilter or {}).get("passed")]
     visible.sort(key=lambda j: (j.first_seen or "", j.posted_at or ""), reverse=True)
-    payload = {
-        "generated_at": iso_now(),
-        "stats": stats,
-        "health": health,
-        "jobs": [_compact(j) for j in visible],
-    }
+    head = {"generated_at": iso_now(), "stats": stats, "health": health}
+    # One job per line so hourly commits diff by line instead of rewriting one giant line.
+    lines = [json.dumps(_compact(j), ensure_ascii=False, separators=(",", ":")) for j in visible]
+    text = "{" + ",".join(f"\"{k}\":{json.dumps(v, ensure_ascii=False, separators=(',', ':'))}" for k, v in head.items()) \
+        + ",\n\"jobs\":[\n" + ",\n".join(lines) + "\n]}\n"
     path = out / "jobs.json"
-    path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    path.write_text(text, encoding="utf-8")
     return path
