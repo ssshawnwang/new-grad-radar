@@ -23,7 +23,7 @@ candidate:
 
 locations:
   country: US
-  # Any posting whose ONLY locations match these is dropped. Example: ["Pittsburgh"]
+  # Any posting whose ONLY locations match these is dropped. Example: ["Anchorage"]
   exclude_only: []
   # One sentence for the classification prompt describing where you want to be.
   preferred_summary: "Anywhere in the United States."
