@@ -1,242 +1,242 @@
 {
- "at": "2026-09-14T02:32:25Z",
+ "at": "2026-09-14T02:41:17Z",
  "sources": {
   "simplify": {
    "ok": true,
    "count": 2339,
-   "at": "2026-09-14T02:24:50Z"
+   "at": "2026-09-14T02:33:37Z"
   },
   "speedyapply_swe": {
    "ok": true,
    "count": 127,
-   "at": "2026-09-14T02:24:50Z"
+   "at": "2026-09-14T02:33:37Z"
   },
   "speedyapply_ai": {
    "ok": true,
    "count": 122,
-   "at": "2026-09-14T02:24:50Z"
+   "at": "2026-09-14T02:33:37Z"
   },
   "amazon:Amazon": {
    "ok": true,
    "count": 25,
-   "at": "2026-09-14T02:24:51Z"
+   "at": "2026-09-14T02:33:39Z"
   },
   "eightfold:Microsoft": {
    "ok": true,
    "count": 45,
-   "at": "2026-09-14T02:24:53Z"
+   "at": "2026-09-14T02:33:41Z"
   },
   "apple:Apple": {
    "ok": true,
    "count": 110,
-   "at": "2026-09-14T02:24:55Z"
+   "at": "2026-09-14T02:33:43Z"
   },
   "eightfold:Netflix": {
    "ok": true,
    "count": 24,
-   "at": "2026-09-14T02:24:57Z"
+   "at": "2026-09-14T02:33:45Z"
   },
   "workday:Nvidia": {
    "ok": true,
    "count": 145,
-   "at": "2026-09-14T02:25:08Z"
+   "at": "2026-09-14T02:33:57Z"
   },
   "workday:Salesforce": {
    "ok": true,
    "count": 119,
-   "at": "2026-09-14T02:25:15Z"
+   "at": "2026-09-14T02:34:02Z"
   },
   "greenhouse:Stripe": {
    "ok": true,
    "count": 632,
-   "at": "2026-09-14T02:25:15Z"
+   "at": "2026-09-14T02:34:03Z"
   },
   "greenhouse:Databricks": {
    "ok": true,
    "count": 891,
-   "at": "2026-09-14T02:25:15Z"
+   "at": "2026-09-14T02:34:03Z"
   },
   "greenhouse:Airbnb": {
    "ok": true,
    "count": 164,
-   "at": "2026-09-14T02:25:15Z"
+   "at": "2026-09-14T02:34:03Z"
   },
   "greenhouse:Pinterest": {
    "ok": true,
    "count": 183,
-   "at": "2026-09-14T02:25:15Z"
+   "at": "2026-09-14T02:34:03Z"
   },
   "greenhouse:Roblox": {
    "ok": true,
    "count": 232,
-   "at": "2026-09-14T02:25:15Z"
+   "at": "2026-09-14T02:34:03Z"
   },
   "lever:Palantir": {
    "ok": true,
    "count": 311,
-   "at": "2026-09-14T02:25:17Z"
+   "at": "2026-09-14T02:34:04Z"
   },
   "greenhouse:Anthropic": {
    "ok": true,
    "count": 596,
-   "at": "2026-09-14T02:25:17Z"
+   "at": "2026-09-14T02:34:05Z"
   },
   "ashby:OpenAI": {
    "ok": true,
    "count": 795,
-   "at": "2026-09-14T02:25:17Z"
+   "at": "2026-09-14T02:34:05Z"
   },
   "greenhouse:Scale AI": {
    "ok": true,
    "count": 223,
-   "at": "2026-09-14T02:25:17Z"
+   "at": "2026-09-14T02:34:05Z"
   },
   "greenhouse:Coinbase": {
    "ok": true,
    "count": 218,
-   "at": "2026-09-14T02:25:17Z"
+   "at": "2026-09-14T02:34:05Z"
   },
   "greenhouse:Robinhood": {
    "ok": true,
    "count": 126,
-   "at": "2026-09-14T02:25:17Z"
+   "at": "2026-09-14T02:34:05Z"
   },
   "greenhouse:Datadog": {
    "ok": true,
    "count": 444,
-   "at": "2026-09-14T02:25:18Z"
+   "at": "2026-09-14T02:34:05Z"
   },
   "workday:Adobe": {
    "ok": true,
    "count": 134,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "greenhouse:DoorDash": {
    "ok": true,
    "count": 456,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "greenhouse:Lyft": {
    "ok": true,
    "count": 183,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "greenhouse:Instacart": {
    "ok": true,
    "count": 104,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "greenhouse:Block": {
    "ok": true,
    "count": 207,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "greenhouse:Dropbox": {
    "ok": true,
    "count": 41,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "greenhouse:Figma": {
    "ok": true,
    "count": 153,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "ashby:Notion": {
    "ok": true,
    "count": 126,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "ashby:Ramp": {
    "ok": true,
    "count": 145,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "ashby:Plaid": {
    "ok": true,
    "count": 111,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "greenhouse:Jane Street": {
    "ok": true,
    "count": 230,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "greenhouse:Hudson River Trading": {
    "ok": true,
    "count": 77,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "greenhouse:Waymo": {
    "ok": true,
    "count": 331,
-   "at": "2026-09-14T02:25:25Z"
+   "at": "2026-09-14T02:34:12Z"
   },
   "lever:Zoox": {
    "ok": true,
    "count": 245,
-   "at": "2026-09-14T02:25:31Z"
+   "at": "2026-09-14T02:34:16Z"
   },
   "greenhouse:Duolingo": {
    "ok": true,
    "count": 80,
-   "at": "2026-09-14T02:25:31Z"
+   "at": "2026-09-14T02:34:16Z"
   },
   "ashby:Aurora": {
    "ok": true,
    "count": 81,
-   "at": "2026-09-14T02:25:31Z"
+   "at": "2026-09-14T02:34:16Z"
   },
   "greenhouse:xAI": {
    "ok": true,
    "count": 254,
-   "at": "2026-09-14T02:25:31Z"
+   "at": "2026-09-14T02:34:16Z"
   },
   "ashby:Perplexity": {
    "ok": true,
    "count": 115,
-   "at": "2026-09-14T02:25:31Z"
+   "at": "2026-09-14T02:34:16Z"
   },
   "ashby:Cursor": {
    "ok": true,
    "count": 127,
-   "at": "2026-09-14T02:25:31Z"
+   "at": "2026-09-14T02:34:16Z"
   },
   "ashby:Cohere": {
    "ok": true,
    "count": 144,
-   "at": "2026-09-14T02:25:31Z"
+   "at": "2026-09-14T02:34:16Z"
   },
   "greenhouse:Together AI": {
    "ok": true,
    "count": 63,
-   "at": "2026-09-14T02:25:31Z"
+   "at": "2026-09-14T02:34:16Z"
   },
   "greenhouse:Glean": {
    "ok": true,
    "count": 118,
-   "at": "2026-09-14T02:25:32Z"
+   "at": "2026-09-14T02:34:16Z"
   },
   "ashby:Sierra": {
    "ok": true,
    "count": 210,
-   "at": "2026-09-14T02:25:32Z"
+   "at": "2026-09-14T02:34:16Z"
   }
  },
  "stats": {
   "active": 1172,
   "screened_in": 1172,
-  "eligible": 567,
-  "new_this_run": 1,
+  "eligible": 695,
+  "new_this_run": 0,
   "fetched": 11606,
   "alerted": 0,
   "classify": {
-   "attempted": 400,
-   "classified": 400,
+   "attempted": 394,
+   "classified": 394,
    "skipped_no_key": false,
-   "pending": 400,
-   "calls": 400,
-   "input_tokens": 1665543,
-   "output_tokens": 70630
+   "pending": 394,
+   "calls": 394,
+   "input_tokens": 1648825,
+   "output_tokens": 66408
   }
  }
 }
