@@ -4,6 +4,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
@@ -24,6 +25,10 @@ from .store import Store
 from .util import session, iso_now, now_utc, days_since, log
 
 HEALTH_PATH = Path("data/health.json")
+
+
+def _norm_title(t: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", (t or "").lower()).strip()
 
 
 def _deep_merge(base: dict, override: dict) -> dict:
@@ -140,11 +145,13 @@ def _merge(store: Store, fetched: list[Job], health: dict, watchlist: Watchlist)
             store.put(job)
             new_jobs.append(job)
             continue
-        # Prefer direct-source metadata over community-list metadata.
+        # Prefer direct-source metadata over community-list metadata. Community lists spell the
+        # same title differently, so only a direct source may overwrite an established title,
+        # and only a materially different title invalidates an existing verdict.
         direct_new = job.source not in COMMUNITY_SOURCES
         direct_old = existing.source not in COMMUNITY_SOURCES
-        title_changed = existing.title != job.title
-        if direct_new or not direct_old:
+        title_changed = direct_new and _norm_title(existing.title) != _norm_title(job.title)
+        if direct_new or (not direct_old and not existing.classification):
             existing.title = job.title
             existing.locations = job.locations or existing.locations
             existing.source = job.source
