@@ -1,0 +1,59 @@
+name: digest
+
+on:
+  schedule:
+    # 13:05 and 14:05 UTC cover 9am Eastern in both daylight and standard time;
+    # the script posts only when it is actually 9am in config.yaml digest.timezone.
+    - cron: "5 13,14 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Post now regardless of the hour"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: radar-state
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Post digest issue
+        env:
+          RADAR_PRIVATE_CONFIG_B64: ${{ secrets.RADAR_PRIVATE_CONFIG_B64 }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.force }}" = "true" ]; then
+            python -m radar digest --force
+          else
+            python -m radar digest
+          fi
+
+      - name: Commit digest markers
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "no changes"
+            exit 0
+          fi
+          git commit -m "digest: $(date -u +%Y-%m-%d)"
+          git pull --rebase --autostash origin ${{ github.ref_name }}
+          git push

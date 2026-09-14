@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New-Grad Radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #F4F6F3; --surface: #FFFFFF; --surface-2: #EDF1EE; --ink: #17211E; --muted: #5B6A66;
+    --line: #D9E0DC; --accent: #1F5F5B; --accent-ink: #FFFFFF; --accent-soft: #E3F0EE;
+    --amber: #A8601F; --amber-soft: #F7E9DA; --red: #A93B31; --red-soft: #F8E2DF; --grey-soft: #ECEFEE;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111917; --surface: #18221F; --surface-2: #1F2B27; --ink: #E7EDEA; --muted: #97A6A1;
+      --line: #2A3633; --accent: #6CC9BF; --accent-ink: #0F1A18; --accent-soft: #1B3330;
+      --amber: #E3A265; --amber-soft: #3A2A1B; --red: #E5786C; --red-soft: #3C1F1C; --grey-soft: #232E2B;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; padding-inline: clamp(16px, 4vw, 40px); padding-block: 28px 64px; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  header { max-width: 1400px; margin: 0 auto 18px; display: grid; gap: 8px; }
+  .eyebrow { font: 12px "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-family: "IBM Plex Serif", Georgia, serif; font-size: clamp(26px, 3vw, 36px); margin: 0; line-height: 1.1; }
+  .lede { color: var(--muted); max-width: 70ch; margin: 0; }
+  .stats { display: flex; flex-wrap: wrap; gap: 8px 22px; font: 12px "IBM Plex Mono", ui-monospace, monospace; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .stats b { color: var(--ink); font-weight: 500; }
+  .toolbar { position: sticky; top: 0; z-index: 5; background: var(--bg); max-width: 1400px; margin: 0 auto; padding-block: 10px; display: grid; gap: 8px; border-bottom: 1px solid var(--line); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+  .search { flex: 1 1 240px; max-width: 420px; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; }
+  .group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .glabel { font: 11px "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+  .chip { font: inherit; font-size: 13px; line-height: 1; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; cursor: pointer; }
+  .chip:hover { border-color: var(--accent); }
+  .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  select { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+  .count { font: 12px "IBM Plex Mono", ui-monospace, monospace; color: var(--muted); margin-left: auto; font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 1400px; margin: 0 auto; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 900px; }
+  th { text-align: left; font: 500 11px "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 12px 10px 8px; border-bottom: 1px solid var(--line); background: var(--bg); }
+  td { padding: 10px; vertical-align: top; border-bottom: 1px solid var(--line); }
+  tr:hover td { background: var(--surface); }
+  td.co { width: 140px; font-weight: 600; }
+  td.co .t1 { display: inline-block; margin-left: 4px; font: 10px "IBM Plex Mono", ui-monospace, monospace; color: var(--accent); vertical-align: middle; }
+  td.title a { color: var(--ink); text-decoration: none; font-weight: 500; }
+  td.title a:hover { color: var(--accent); text-decoration: underline; }
+  td.title .reason { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  td.loc { width: 200px; color: var(--muted); font-size: 13px; }
+  td.date { width: 92px; font: 12px "IBM Plex Mono", ui-monospace, monospace; color: var(--muted); white-space: nowrap; }
+  td.fit { width: 64px; font: 500 13px "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .tag { font: 11px "IBM Plex Mono", ui-monospace, monospace; padding: 2px 7px; border-radius: 4px; background: var(--grey-soft); color: var(--muted); }
+  .tag.ml { background: var(--accent-soft); color: var(--accent); }
+  .tag.sde { background: var(--accent-soft); color: var(--accent); }
+  .tag.adj { background: var(--surface-2); color: var(--muted); }
+  .tag.warn { background: var(--red-soft); color: var(--red); }
+  .tag.note { background: var(--amber-soft); color: var(--amber); }
+  .tag.pref { background: var(--accent-soft); color: var(--accent); }
+  .new { font: 500 10px "IBM Plex Mono", ui-monospace, monospace; color: var(--accent); letter-spacing: .06em; }
+  .empty { padding: 40px 10px; text-align: center; color: var(--muted); }
+  .health { max-width: 1400px; margin: 28px auto 0; font: 12px "IBM Plex Mono", ui-monospace, monospace; color: var(--muted); }
+  .health .bad { color: var(--red); }
+  @media (max-width: 720px) {
+    table { min-width: 0; } thead { display: none; }
+    tbody tr { display: grid; gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    td { display: block; padding: 0; border: 0; width: auto !important; }
+    td.date::before { content: "first seen "; }
+    td.fit::before { content: "fit "; color: var(--muted); font-weight: 400; }
+    .count { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">new-grad radar · <span id="gen">loading</span></div>
+  <h1>Open new-grad postings</h1>
+  <p class="lede">Every posting the radar has screened in, with Claude's verdict on eligibility and fit. Newest first. Alerts and daily digests are posted as issues in the repository.</p>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="toolbar">
+  <div class="row">
+    <input class="search" id="q" type="search" placeholder="Search company, title, location…" aria-label="Search">
+    <select id="sort" aria-label="Sort">
+      <option value="first_seen">Newest found</option>
+      <option value="posted">Newest posted</option>
+      <option value="fit">Best fit</option>
+      <option value="company">Company</option>
+    </select>
+    <div class="count" id="count"></div>
+  </div>
+  <div class="row">
+    <div class="group" id="g-elig"><span class="glabel">Verdict</span></div>
+    <div class="group" id="g-bucket"><span class="glabel">Role</span></div>
+    <div class="group" id="g-tier"><span class="glabel">Tier</span></div>
+    <div class="group" id="g-loc"><span class="glabel">Location</span></div>
+    <div class="group" id="g-when"><span class="glabel">Found</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <table>
+    <thead><tr><th>Company</th><th>Posting</th><th>Locations</th><th>Found</th><th>Fit</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+<div class="health" id="health"></div>
+
+<script>
+const state = { q: "", elig: "eligible", bucket: "any", tier: "any", loc: "any", when: "any", sort: "first_seen" };
+const OPTS = {
+  elig: [["eligible", "Eligible"], ["all", "All screened"], ["unclassified", "Unclassified"]],
+  bucket: [["any", "Any"], ["sde", "SDE"], ["ml", "ML / AI"], ["adjacent", "Adjacent"]],
+  tier: [["any", "Any"], ["1", "Tier 1"]],
+  loc: [["any", "Any"], ["preferred", "Preferred"]],
+  when: [["any", "Any time"], ["1", "24 h"], ["7", "7 days"]],
+};
+let DATA = { jobs: [] };
+
+function chips(id, key) {
+  const c = document.getElementById(id);
+  OPTS[key].forEach(([val, label]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = label;
+    b.setAttribute("aria-pressed", String(state[key] === val));
+    b.addEventListener("click", () => {
+      state[key] = val;
+      c.querySelectorAll(".chip").forEach(x => x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", "true");
+      render();
+    });
+    c.appendChild(b);
+  });
+}
+chips("g-elig", "elig"); chips("g-bucket", "bucket"); chips("g-tier", "tier"); chips("g-loc", "loc"); chips("g-when", "when");
+document.getElementById("q").addEventListener("input", e => { state.q = e.target.value.trim().toLowerCase(); render(); });
+document.getElementById("sort").addEventListener("change", e => { state.sort = e.target.value; render(); });
+
+function daysAgo(d) { if (!d) return Infinity; return (Date.now() - new Date(d + "T00:00:00Z").getTime()) / 86400000; }
+
+function tag(cls, text) { const s = document.createElement("span"); s.className = "tag " + cls; s.textContent = text; return s; }
+
+function render() {
+  const tbody = document.getElementById("rows");
+  tbody.textContent = "";
+  let rows = DATA.jobs.filter(j => {
+    if (state.elig === "eligible" && j.eligible !== true) return false;
+    if (state.elig === "unclassified" && j.classified) return false;
+    if (state.bucket !== "any" && j.bucket !== state.bucket) return false;
+    if (state.tier === "1" && j.tier !== 1) return false;
+    if (state.loc === "preferred" && !j.preferred) return false;
+    if (state.when !== "any" && daysAgo(j.first_seen) > Number(state.when)) return false;
+    if (state.q) {
+      const hay = [j.company, j.title, ...(j.locations || []), j.reason || ""].join(" ").toLowerCase();
+      if (!hay.includes(state.q)) return false;
+    }
+    return true;
+  });
+  const key = state.sort;
+  rows.sort((a, b) => {
+    if (key === "fit") return (b.fit ?? -1) - (a.fit ?? -1) || (b.first_seen || "").localeCompare(a.first_seen || "");
+    if (key === "company") return a.company.localeCompare(b.company) || (b.first_seen || "").localeCompare(a.first_seen || "");
+    if (key === "posted") return (b.posted || "").localeCompare(a.posted || "") || (b.first_seen || "").localeCompare(a.first_seen || "");
+    return (b.first_seen || "").localeCompare(a.first_seen || "") || (b.fit ?? -1) - (a.fit ?? -1);
+  });
+  for (const j of rows) {
+    const tr = document.createElement("tr");
+    const co = document.createElement("td"); co.className = "co"; co.textContent = j.company;
+    if (j.tier === 1) { const t = document.createElement("span"); t.className = "t1"; t.textContent = "TIER 1"; co.appendChild(t); }
+    tr.appendChild(co);
+
+    const ti = document.createElement("td"); ti.className = "title";
+    const a = document.createElement("a"); a.href = j.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = j.title; ti.appendChild(a);
+    if (j.reason) { const r = document.createElement("span"); r.className = "reason"; r.textContent = j.reason; ti.appendChild(r); }
+    const tags = document.createElement("div"); tags.className = "tags";
+    if (j.bucket === "ml") tags.appendChild(tag("ml", "ML"));
+    else if (j.bucket === "sde") tags.appendChild(tag("sde", "SDE"));
+    else if (j.bucket === "adjacent") tags.appendChild(tag("adj", "adjacent"));
+    if (j.resume) tags.appendChild(tag("", j.resume + " resume"));
+    if (j.sponsorship === "no") tags.appendChild(tag("warn", "no sponsorship"));
+    if (j.citizenship) tags.appendChild(tag("warn", "citizenship"));
+    if (j.phd) tags.appendChild(tag("note", "PhD"));
+    if (j.start === "2026") tags.appendChild(tag("note", "2026 start"));
+    if (j.confidence === "low") tags.appendChild(tag("", "title only"));
+    if (!j.classified) tags.appendChild(tag("", "unclassified"));
+    if (tags.childElementCount) ti.appendChild(tags);
+    tr.appendChild(ti);
+
+    const lo = document.createElement("td"); lo.className = "loc";
+    lo.textContent = (j.locations || []).slice(0, 3).join("; ") + ((j.locations || []).length > 3 ? " …" : "");
+    if (j.preferred) { lo.appendChild(document.createElement("br")); lo.appendChild(tag("pref", "preferred")); }
+    tr.appendChild(lo);
+
+    const da = document.createElement("td"); da.className = "date";
+    da.textContent = j.first_seen || "";
+    if (daysAgo(j.first_seen) <= 1) { da.appendChild(document.createElement("br")); const n = document.createElement("span"); n.className = "new"; n.textContent = "NEW"; da.appendChild(n); }
+    if (j.posted) { da.appendChild(document.createElement("br")); const p = document.createElement("span"); p.textContent = "posted " + j.posted; p.style.fontSize = "11px"; da.appendChild(p); }
+    tr.appendChild(da);
+
+    const fi = document.createElement("td"); fi.className = "fit"; fi.textContent = j.fit ?? "—";
+    tr.appendChild(fi);
+    tbody.appendChild(tr);
+  }
+  if (!rows.length) {
+    const tr = document.createElement("tr"); const td = document.createElement("td"); td.colSpan = 5; td.className = "empty";
+    td.textContent = DATA.jobs.length ? "No postings match these filters." : "No data yet. The first run of the radar fills this table.";
+    tr.appendChild(td); tbody.appendChild(tr);
+  }
+  document.getElementById("count").textContent = `${rows.length} of ${DATA.jobs.length} screened postings`;
+}
+
+function renderMeta() {
+  document.getElementById("gen").textContent = DATA.generated_at ? "updated " + DATA.generated_at.replace("T", " ").replace("Z", " UTC") : "no data yet";
+  const s = DATA.stats || {};
+  const el = document.getElementById("stats");
+  el.textContent = "";
+  const items = [["tracked", s.active], ["screened in", s.screened_in], ["eligible", s.eligible], ["new this run", s.new_this_run]];
+  for (const [k, v] of items) {
+    if (v === undefined) continue;
+    const span = document.createElement("span"); span.innerHTML = `<b>${v}</b> ${k}`; el.appendChild(span);
+  }
+  const h = DATA.health || {};
+  const bad = Object.entries(h).filter(([, v]) => !v.ok);
+  const hl = document.getElementById("health");
+  hl.textContent = "";
+  const ok = Object.keys(h).length - bad.length;
+  hl.append(`sources: ${ok} ok`);
+  if (bad.length) { hl.append(", "); const b = document.createElement("span"); b.className = "bad"; b.textContent = bad.length + " failing: " + bad.map(([k]) => k).join(", "); hl.appendChild(b); }
+}
+
+fetch("jobs.json", { cache: "no-store" }).then(r => r.ok ? r.json() : { jobs: [] }).then(d => { DATA = d; renderMeta(); render(); })
+  .catch(() => { renderMeta(); render(); });
+</script>
+</body>
+</html>

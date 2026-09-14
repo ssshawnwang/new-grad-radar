@@ -1,0 +1,319 @@
+# Companies to watch.
+#
+#   name:     display name; also used to match postings from the community lists
+#   aliases:  other spellings the community lists use for the same company
+#   tier:     1 = instant alert issue when a new eligible posting appears; 2 = digest only
+#   ats:      hiring platform to poll directly. One of:
+#               greenhouse | ashby | lever | smartrecruiters | workday | amazon | apple | eightfold | none
+#             "none" means the company's site can't be polled without a browser;
+#             its postings still arrive through the Simplify and speedyapply lists.
+#   token:    board identifier for greenhouse / ashby / lever / smartrecruiters
+#   workday:  {host, tenant, site} for Workday sites
+#   eightfold: {host, domain, variant}  variant is "pcsx" (Microsoft) or "apply_v2" (Netflix)
+#   level_exception: true if a "II" title is the new-grad level at this company
+#
+# Add a company with:  python -m radar add-company "Company Name" --tier 1
+# (it probes Greenhouse, Ashby, Lever and SmartRecruiters for the board id)
+
+- name: Amazon
+  aliases: [AWS, Amazon Web Services, Amazon.com]
+  tier: 1
+  ats: amazon
+
+- name: Google
+  aliases: [Alphabet, YouTube, DeepMind, Google DeepMind]
+  tier: 1
+  ats: none
+
+- name: Meta
+  aliases: [Facebook]
+  tier: 1
+  ats: none
+
+- name: Microsoft
+  tier: 1
+  ats: eightfold
+  eightfold: {host: apply.careers.microsoft.com, domain: microsoft.com, variant: pcsx}
+
+- name: Apple
+  tier: 1
+  ats: apple
+
+- name: Netflix
+  tier: 1
+  ats: eightfold
+  eightfold: {host: explore.jobs.netflix.net, domain: netflix.com, variant: apply_v2}
+
+- name: Nvidia
+  aliases: [NVIDIA]
+  tier: 1
+  ats: workday
+  workday: {host: nvidia.wd5.myworkdayjobs.com, tenant: nvidia, site: NVIDIAExternalCareerSite}
+
+- name: Uber
+  tier: 1
+  ats: none
+
+- name: LinkedIn
+  tier: 1
+  ats: none
+
+- name: Salesforce
+  aliases: [Slack, Tableau]
+  tier: 1
+  ats: workday
+  workday: {host: salesforce.wd12.myworkdayjobs.com, tenant: salesforce, site: External_Career_Site}
+
+- name: Stripe
+  tier: 1
+  ats: greenhouse
+  token: stripe
+
+- name: Databricks
+  tier: 1
+  ats: greenhouse
+  token: databricks
+
+- name: Airbnb
+  tier: 1
+  ats: greenhouse
+  token: airbnb
+
+- name: Pinterest
+  tier: 1
+  ats: greenhouse
+  token: pinterest
+
+- name: Snap
+  aliases: [Snap Inc., Snapchat]
+  tier: 1
+  ats: none
+
+- name: Roblox
+  tier: 1
+  ats: greenhouse
+  token: roblox
+
+- name: TikTok
+  aliases: [ByteDance, TikTok/ByteDance]
+  tier: 1
+  ats: none
+
+- name: Palantir
+  aliases: [Palantir Technologies]
+  tier: 1
+  ats: lever
+  token: palantir
+
+- name: Anthropic
+  tier: 1
+  ats: greenhouse
+  token: anthropic
+
+- name: OpenAI
+  tier: 1
+  ats: ashby
+  token: openai
+
+- name: Scale AI
+  aliases: [Scale]
+  tier: 1
+  ats: greenhouse
+  token: scaleai
+
+- name: Coinbase
+  tier: 2
+  ats: greenhouse
+  token: coinbase
+
+- name: Robinhood
+  tier: 1
+  ats: greenhouse
+  token: robinhood
+
+- name: Datadog
+  tier: 2
+  ats: greenhouse
+  token: datadog
+
+- name: Bloomberg
+  aliases: [Bloomberg LP]
+  tier: 2
+  ats: none
+
+- name: Capital One
+  tier: 2
+  ats: none
+
+- name: JPMorgan Chase
+  aliases: [JPMorganChase, JPMorgan, J.P. Morgan, JPMC]
+  tier: 2
+  ats: none
+
+- name: Goldman Sachs
+  tier: 2
+  ats: none
+
+- name: Walmart
+  aliases: [Walmart Global Tech]
+  tier: 2
+  ats: none
+  level_exception: true
+
+- name: Oracle
+  aliases: [Oracle Cloud Infrastructure, OCI]
+  tier: 2
+  ats: none
+
+- name: IBM
+  tier: 2
+  ats: none
+
+- name: Cisco
+  tier: 2
+  ats: none
+
+- name: Intuit
+  tier: 2
+  ats: none
+
+- name: Adobe
+  tier: 2
+  ats: workday
+  workday: {host: adobe.wd5.myworkdayjobs.com, tenant: adobe, site: external_experienced}
+
+- name: Qualcomm
+  tier: 2
+  ats: none
+
+- name: DoorDash
+  tier: 1
+  ats: greenhouse
+  token: doordashusa
+
+- name: Lyft
+  tier: 2
+  ats: greenhouse
+  token: lyft
+
+- name: Instacart
+  tier: 2
+  ats: greenhouse
+  token: instacart
+
+- name: Block
+  aliases: [Square, Cash App]
+  tier: 2
+  ats: greenhouse
+  token: block
+
+- name: Atlassian
+  tier: 2
+  ats: none
+
+- name: Dropbox
+  tier: 2
+  ats: greenhouse
+  token: dropbox
+
+- name: Figma
+  tier: 2
+  ats: greenhouse
+  token: figma
+
+- name: Notion
+  tier: 1
+  ats: ashby
+  token: notion
+
+- name: Ramp
+  tier: 2
+  ats: ashby
+  token: ramp
+
+- name: Plaid
+  tier: 2
+  ats: ashby
+  token: plaid
+
+- name: Two Sigma
+  tier: 2
+  ats: none
+
+- name: Citadel
+  aliases: [Citadel Securities]
+  tier: 2
+  ats: none
+
+- name: Jane Street
+  tier: 1
+  ats: greenhouse
+  token: janestreet
+
+- name: Hudson River Trading
+  aliases: [HRT]
+  tier: 1
+  ats: greenhouse
+  token: wehrtyou
+
+- name: Waymo
+  tier: 1
+  ats: greenhouse
+  token: waymo
+
+- name: Zoox
+  tier: 2
+  ats: lever
+  token: zoox
+
+- name: Duolingo
+  tier: 2
+  ats: greenhouse
+  token: duolingo
+
+- name: Aurora
+  aliases: [Aurora Innovation]
+  tier: 2
+  ats: ashby
+  token: aurora-operations-inc
+
+- name: xAI
+  tier: 2
+  ats: greenhouse
+  token: xai
+
+- name: Perplexity
+  aliases: [Perplexity AI]
+  tier: 2
+  ats: ashby
+  token: perplexity
+
+- name: Cursor
+  aliases: [Anysphere]
+  tier: 1
+  ats: ashby
+  token: cursor
+
+- name: Cohere
+  tier: 2
+  ats: ashby
+  token: cohere
+
+- name: Hugging Face
+  tier: 2
+  ats: none
+
+- name: Together AI
+  tier: 2
+  ats: greenhouse
+  token: togetherai
+
+- name: Glean
+  tier: 2
+  ats: greenhouse
+  token: gleanwork
+
+- name: Sierra
+  tier: 2
+  ats: ashby
+  token: sierra

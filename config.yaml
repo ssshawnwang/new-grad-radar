@@ -1,0 +1,97 @@
+# new-grad-radar configuration: PUBLIC defaults.
+#
+# Anything personal goes in config.private.yaml (gitignored) using the same structure; it is
+# merged over this file at load time. For GitHub Actions, store the same YAML base64-encoded in
+# the repository secret RADAR_PRIVATE_CONFIG_B64:
+#
+#   base64 < config.private.yaml | tr -d '\n' | gh secret set RADAR_PRIVATE_CONFIG_B64
+#
+# The `candidate` and `locations` blocks below are deliberately generic placeholders.
+
+candidate:
+  # Used verbatim in the classification prompt so Claude judges eligibility for *you*.
+  # Override in config.private.yaml with your real degree, timing, skills and visa situation.
+  summary: >
+    A student finishing a bachelor's or master's degree in a computing-related field, seeking
+    an entry-level software engineering or machine learning role in the United States, with
+    internship experience in software or data work.
+  graduation: "2027-05"
+  earliest_start: "2027-06"
+  needs_sponsorship: false
+  # Postings that say "2026 start" are kept but flagged, since some accept December grads.
+  include_previous_start_year: true
+
+locations:
+  country: US
+  # Any posting whose ONLY locations match these is dropped. Example: ["Pittsburgh"]
+  exclude_only: []
+  # One sentence for the classification prompt describing where you want to be.
+  preferred_summary: "Anywhere in the United States."
+  # Postings with at least one location matching these are ranked first. Example: ["California", "Seattle"]
+  preferred: []
+
+roles:
+  # A title must match this to be considered at all (case-insensitive regex).
+  include_title: "software|engineer|developer|machine learning|\\bml\\b|\\bai\\b|scientist|research engineer|forward deployed|member of technical staff|\\bmts\\b|algorithm|quant|infrastructure|platform|backend|back-end|full.?stack|\\bsde\\b|\\bswe\\b|data science|deep learning|llm"
+  # Titles matching this are dropped outright.
+  exclude_title: "\\b(senior|sr\\.?|staff|principal|lead|director|manager|head of|vp|intern|internship|co-op|coop|fellowship|apprentice|apprenticeship|mba|sales|recruit|marketing|account|designer|electrical|mechanical|civil|hardware|asic|rtl|fpga|analog|physical design|dft|technician|nurse|pharmacist|attorney|paralegal|solutions consultant|customer success|support engineer|technical writer|program manager|product manager|test|qa|quality|verification|validation|silicon|circuit|architect|power (?:architect|methodology|modeling|engineer)|signal integrity|packaging|layout|mixed.?signal|methodology|cell modeling|timing|cad engineer|emulation|design engineer|contributor|annotator|trainer|freelance|contract|administrative|business partner|coordinator|assistant|trader|underwriter|actuar\\w*|accountant|auditor)\\b"
+  # Community-list postings older than this many days are skipped (they linger as "active" for months).
+  max_age_days_community: 120
+  # Level suffixes that mean mid-level almost everywhere. Companies listed under
+  # level_exception in companies.yaml (e.g. Walmart, where "II" is the new-grad level) skip this.
+  exclude_level: "\\b(ii|iii|iv|l4|l5|l6|e5|e6|ic3|ic4|level [4-9]|[2-9])\\b"
+  # Drop titles that mention PhD without also mentioning MS/BS/Advanced Degree.
+  exclude_phd_only: true
+  # Titles that signal new-grad seniority. Required for jobs found by direct ATS polling.
+  # Jobs from the community new-grad lists (Simplify, speedyapply) skip this check.
+  newgrad_title: "new grad|new graduate|new college grad|\\bncg\\b|university grad|college grad|early career|early in career|early-career|entry.level|campus|graduate|2027|class of 2027|emerging talent|new analyst|\\bi\\b|\\b1\\b|level 3|associate|residency|aspire|futureforce|amts|technology development program|full-time opportunities for university"
+
+# Search terms for sources that need a query (Workday, Amazon, Apple, Eightfold).
+search_terms:
+  - "new grad"
+  - "new college grad"
+  - "university grad"
+  - "early career"
+  - "graduate 2027"
+  - "machine learning engineer"
+
+classify:
+  model: "claude-opus-5"
+  effort: "medium"
+  max_per_run: 400
+  # Parallel model calls per run. 4 stays well inside default rate limits.
+  workers: 4
+  description_max_chars: 12000
+  # Server-side refusal fallback (recommended by Anthropic for Opus 5 code).
+  server_side_fallback: true
+
+alerts:
+  enabled: true
+  # Only alert on tier-1 postings that are genuinely fresh; older ones go in the digest.
+  max_posting_age_days: 7
+
+digest:
+  timezone: "America/New_York"
+  hour: 9
+  max_items: 150
+  close_after_days: 7
+
+schedule:
+  timezone: "America/New_York"
+  # Hourly runs until this date, then every N hours.
+  peak_until: "2026-11-30"
+  offpeak_every_hours: 6
+
+sources:
+  simplify: true
+  speedyapply_swe: true
+  speedyapply_ai: true
+  # Direct polling of companies.yaml entries with a known platform.
+  direct: true
+
+github:
+  # Filled automatically inside GitHub Actions from GITHUB_REPOSITORY; set for local runs.
+  repo: "ssshawnwang/new-grad-radar"
+  labels:
+    alert: "alert"
+    digest: "digest"

@@ -1,0 +1,13 @@
+[project]
+name = "new-grad-radar"
+version = "0.1.0"
+description = "Watches US tech career sites for new-grad software and ML postings, classifies them with Claude, and posts digests and alerts as GitHub Issues."
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.80",
+    "requests>=2.32",
+    "PyYAML>=6.0",
+]
+
+[tool.setuptools]
+packages = ["radar", "radar.sources"]
