@@ -12,13 +12,13 @@ from .util import session, log
 def _cmd_run(args):
     from .pipeline import run
     out = run(force=args.force, no_classify=args.no_classify, no_alerts=args.no_alerts,
-              limit=args.limit, dry_run=args.dry_run)
+              limit=args.limit, dry_run=args.dry_run, backend=args.backend)
     print(json.dumps(out, indent=1))
 
 
 def _cmd_digest(args):
     from .pipeline import digest
-    out = digest(force=args.force, dry_run=args.dry_run)
+    out = digest(force=args.force, dry_run=args.dry_run, skip_empty=args.skip_empty)
     print(json.dumps(out, indent=1))
 
 
@@ -104,11 +104,15 @@ def main(argv=None):
     r.add_argument("--no-alerts", action="store_true")
     r.add_argument("--limit", type=int, default=None, help="max postings to classify this run")
     r.add_argument("--dry-run", action="store_true", help="do not create GitHub issues")
+    r.add_argument("--backend", choices=["auto", "api", "claude_code"], default=None,
+                   help="who classifies: api (ANTHROPIC_API_KEY), claude_code (`claude -p` on your "
+                        "Claude Code login), auto (default: api if a key is set, else claude_code)")
     r.set_defaults(fn=_cmd_run)
 
     d = sub.add_parser("digest", help="post the daily digest issue")
     d.add_argument("--force", action="store_true", help="ignore the digest hour")
     d.add_argument("--dry-run", action="store_true", help="print instead of posting")
+    d.add_argument("--skip-empty", action="store_true", help="post nothing when there are no new eligible postings")
     d.set_defaults(fn=_cmd_digest)
 
     st = sub.add_parser("stats", help="print store statistics")

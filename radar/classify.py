@@ -1,8 +1,16 @@
-"""Ask Claude whether a posting fits the candidate. One structured call per new posting."""
+"""Ask Claude whether a posting fits the candidate. One structured call per new posting.
+
+Two interchangeable backends produce the same verdict dict:
+  Classifier           Anthropic API via the SDK (metered by an API key).
+  ClaudeCodeClassifier `claude -p`, Claude Code headless mode, on the Claude Code login
+                       (Pro/Max subscription or CLAUDE_CODE_OAUTH_TOKEN). No per-token bill.
+"""
 from __future__ import annotations
 
 import json
 import os
+import shutil
+import subprocess
 from typing import Optional
 
 import anthropic
@@ -168,3 +176,132 @@ class Classifier:
         data["classified_at"] = iso_now()
         data["had_description"] = bool(description)
         return data
+
+
+class ClassifierAuthError(RuntimeError):
+    """The classification backend has no usable credentials."""
+
+
+class ClassifierRateLimited(RuntimeError):
+    """The backend's usage limit was reached; remaining postings stay pending for the next round."""
+
+
+CLAUDE_BIN = os.environ.get("RADAR_CLAUDE_BIN", "claude")
+_METERED_KEYS = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN")
+
+
+class ClaudeCodeClassifier:
+    """Same verdicts as Classifier, but every call is one `claude -p` subprocess.
+
+    Anthropic allows subscription (claude.ai) credentials only inside Claude Code itself, not
+    with the SDK, so this shells out to the CLI instead of reusing the client above. The
+    child runs with no tools, no MCP servers, no settings files and no session persistence,
+    and with ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN removed so the CLI cannot quietly fall
+    back to a metered key. Structured output comes from --json-schema.
+    """
+
+    def __init__(self, cfg: dict):
+        self.cfg = cfg["classify"]
+        self.model = self.cfg.get("model", "claude-opus-5")
+        self.effort = self.cfg.get("effort", "medium")
+        self.timeout = int(self.cfg.get("claude_code_timeout", 180))
+        self.system = _system_prompt(cfg)
+        self.schema = json.dumps(SCHEMA)
+        self.calls = 0
+        self.input_tokens = 0
+        self.output_tokens = 0
+        self.halted = False
+
+    @staticmethod
+    def available() -> bool:
+        return shutil.which(CLAUDE_BIN) is not None
+
+    def _command(self) -> list[str]:
+        return [
+            CLAUDE_BIN, "-p",
+            "--model", self.model,
+            "--effort", self.effort,
+            "--tools", "",
+            "--strict-mcp-config",
+            "--setting-sources", "",
+            "--no-session-persistence",
+            "--output-format", "json",
+            "--json-schema", self.schema,
+            "--system-prompt", self.system,
+        ]
+
+    def _check_fatal(self, msg: str) -> None:
+        low = msg.lower()
+        if "not logged in" in low or "/login" in low or "invalid api key" in low or "authentication" in low:
+            raise ClassifierAuthError(msg[:300])
+        if "limit" in low and any(w in low for w in ("usage", "rate", "reached", "hit", "exceed", "resets")):
+            self.halted = True
+            raise ClassifierRateLimited(msg[:300])
+
+    def classify(self, job: Job, description: Optional[str]) -> Optional[dict]:
+        if self.halted:
+            return None
+        env = {k: v for k, v in os.environ.items() if k not in _METERED_KEYS}
+        try:
+            proc = subprocess.run(self._command(), input=_user_content(job, description), capture_output=True,
+                                  text=True, timeout=self.timeout, env=env)
+        except subprocess.TimeoutExpired:
+            log.warning("claude -p timed out after %ss for %s", self.timeout, job.url)
+            return None
+        except OSError as e:
+            raise ClassifierAuthError(f"cannot run {CLAUDE_BIN}: {e}") from e
+        try:
+            out = json.loads(proc.stdout)
+        except json.JSONDecodeError:
+            msg = (proc.stderr or proc.stdout or "").strip()
+            self._check_fatal(msg)
+            log.warning("claude -p returned no JSON for %s (exit %s): %s", job.url, proc.returncode, msg[:300])
+            return None
+        if out.get("is_error") or out.get("subtype") != "success":
+            msg = str(out.get("result") or out.get("error") or out.get("subtype") or "unknown error")
+            self._check_fatal(msg)
+            log.warning("claude -p failed for %s: %s", job.url, msg[:300])
+            return None
+
+        self.calls += 1
+        u = out.get("usage") or {}
+        self.input_tokens += (u.get("input_tokens") or 0) + (u.get("cache_read_input_tokens") or 0) \
+            + (u.get("cache_creation_input_tokens") or 0)
+        self.output_tokens += u.get("output_tokens") or 0
+        used = list((out.get("modelUsage") or {}).keys())
+        model = used[0] if used else self.model
+
+        verdict = out.get("structured_output")
+        if not isinstance(verdict, dict) or "eligible" not in verdict:
+            # Finished without a schema-shaped answer (e.g. a refusal). Record it so the
+            # posting is listed as unclassified rather than retried every round.
+            log.warning("no structured verdict for %s: %r", job.url, str(out.get("result"))[:200])
+            return {"error": "no_verdict", "model": model, "classified_at": iso_now()}
+        data = dict(verdict)
+        data["model"] = model
+        data["classified_at"] = iso_now()
+        data["had_description"] = bool(description)
+        return data
+
+
+BACKENDS = ("auto", "api", "claude_code")
+
+
+def pick_backend(cfg: dict, override: Optional[str] = None) -> Optional[str]:
+    """Resolve classify.backend (or a CLI override) to a usable backend name, or None."""
+    want = (override or cfg["classify"].get("backend") or "auto").lower()
+    if want not in BACKENDS:
+        raise ValueError(f"unknown classify backend {want!r}; expected one of {BACKENDS}")
+    if want == "api":
+        return "api" if Classifier.available() else None
+    if want == "claude_code":
+        return "claude_code" if ClaudeCodeClassifier.available() else None
+    if Classifier.available():
+        return "api"
+    if ClaudeCodeClassifier.available():
+        return "claude_code"
+    return None
+
+
+def make_classifier(cfg: dict, backend: str):
+    return Classifier(cfg) if backend == "api" else ClaudeCodeClassifier(cfg)

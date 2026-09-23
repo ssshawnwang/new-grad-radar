@@ -14,7 +14,7 @@ import anthropic
 import yaml
 
 from . import dashboard, sources
-from .classify import Classifier
+from .classify import ClassifierAuthError, ClassifierRateLimited, make_classifier, pick_backend
 from .companies import Watchlist
 from .descriptions import fetch_description
 from .github import GitHub, resolve_token
@@ -187,7 +187,8 @@ def _merge(store: Store, fetched: list[Job], health: dict, watchlist: Watchlist)
     return new_jobs, seen_ids
 
 
-def _classify(store: Store, cfg: dict, watchlist: Watchlist, limit: int | None) -> dict:
+def _classify(store: Store, cfg: dict, watchlist: Watchlist, limit: int | None,
+              backend: str | None = None) -> dict:
     stats = {"attempted": 0, "classified": 0, "skipped_no_key": False}
     candidates = [j for j in store.active() if (j.prefilter or {}).get("passed") and not j.classification]
     candidates.sort(key=lambda j: (0 if j.tier == 1 else 1, -(int((j.posted_at or "0000").replace("-", "")) if j.posted_at else 0)))
@@ -196,16 +197,21 @@ def _classify(store: Store, cfg: dict, watchlist: Watchlist, limit: int | None) 
     stats["pending"] = len(candidates)
     if not candidates:
         return stats
-    if not Classifier.available():
-        log.warning("ANTHROPIC_API_KEY not set; skipping classification of %d postings", len(candidates))
+    chosen = pick_backend(cfg, backend)
+    if not chosen:
+        log.warning("no classification backend: set ANTHROPIC_API_KEY, or install Claude Code and log in "
+                    "(classify.backend: claude_code); skipping %d postings", len(candidates))
         stats["skipped_no_key"] = True
         return stats
-    clf = Classifier(cfg)
+    stats["backend"] = chosen
+    clf = make_classifier(cfg, chosen)
     max_chars = int(cfg["classify"].get("description_max_chars", 12000))
     workers = max(1, int(cfg["classify"].get("workers", 4)))
     auth_failed = False
 
     def work(job: Job):
+        if getattr(clf, "halted", False):
+            return job, None
         s = session()
         desc = fetch_description(s, job, max_chars)
         return job, clf.classify(job, desc)
@@ -216,11 +222,16 @@ def _classify(store: Store, cfg: dict, watchlist: Watchlist, limit: int | None) 
             stats["attempted"] += 1
             try:
                 job, result = fut.result()
-            except anthropic.AuthenticationError:
+            except (anthropic.AuthenticationError, ClassifierAuthError) as e:
                 if not auth_failed:
-                    log.error("ANTHROPIC_API_KEY was rejected (401); skipping classification this run")
+                    log.error("classifier credentials rejected; skipping classification this run (%s)", e)
                 auth_failed = True
                 stats["auth_failed"] = True
+                continue
+            except ClassifierRateLimited as e:
+                if not stats.get("rate_limited"):
+                    log.warning("usage limit reached; remaining postings stay pending for the next round (%s)", e)
+                stats["rate_limited"] = True
                 continue
             except Exception as e:  # noqa: BLE001
                 log.warning("classification worker failed: %s", e)
@@ -270,7 +281,7 @@ def _alerts(store: Store, cfg: dict, gh: GitHub | None, dry_run: bool) -> int:
 
 
 def run(*, force: bool = False, no_classify: bool = False, no_alerts: bool = False,
-        limit: int | None = None, dry_run: bool = False) -> dict:
+        limit: int | None = None, dry_run: bool = False, backend: str | None = None) -> dict:
     cfg = load_config()
     if not in_schedule(cfg, force):
         log.info("outside schedule window; nothing to do")
@@ -288,7 +299,7 @@ def run(*, force: bool = False, no_classify: bool = False, no_alerts: bool = Fal
                 if not (j.prefilter or {}).get("passed") and not j.classification and not j.alerted_at and not j.digested_at]:
         del store.jobs[jid]
 
-    cls_stats = {} if no_classify else _classify(store, cfg, watchlist, limit)
+    cls_stats = {} if no_classify else _classify(store, cfg, watchlist, limit, backend)
 
     gh = None
     repo = repo_name(cfg)
@@ -308,7 +319,7 @@ def run(*, force: bool = False, no_classify: bool = False, no_alerts: bool = Fal
     return counts
 
 
-def digest(*, force: bool = False, dry_run: bool = False) -> dict:
+def digest(*, force: bool = False, dry_run: bool = False, skip_empty: bool = False) -> dict:
     cfg = load_config()
     dcfg = cfg.get("digest") or {}
     tz = ZoneInfo(dcfg.get("timezone", "America/New_York"))
@@ -329,6 +340,10 @@ def digest(*, force: bool = False, dry_run: bool = False) -> dict:
                 j.digested_at = "skipped:not_eligible"
         else:
             unclassified.append(j)
+    if skip_empty and not eligible:
+        log.info("no new eligible postings since the last digest; nothing posted")
+        store.save()
+        return {"eligible": 0, "unclassified": len(unclassified), "skipped": "empty"}
     health = {}
     if HEALTH_PATH.exists():
         health = json.loads(HEALTH_PATH.read_text(encoding="utf-8")).get("sources", {})

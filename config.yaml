@@ -56,6 +56,11 @@ search_terms:
   - "machine learning engineer"
 
 classify:
+  # Who answers. "api": the Anthropic API with ANTHROPIC_API_KEY (metered). "claude_code":
+  # headless Claude Code (`claude -p`) on your Claude Code login, i.e. a Pro/Max subscription
+  # or a CLAUDE_CODE_OAUTH_TOKEN, with no per-token bill. "auto": api if a key is set,
+  # otherwise claude_code if the `claude` CLI is installed. `round.sh` forces claude_code.
+  backend: "auto"
   model: "claude-opus-5"
   effort: "medium"
   max_per_run: 400

@@ -6,7 +6,7 @@ Watches US tech career sites for **new-grad software and machine-learning postin
 - **Instant alerts** for tier-1 companies, also as Issues, within an hour of the posting appearing.
 - **Dashboard** at `https://<owner>.github.io/<repo>/` listing every open eligible posting with filters.
 
-No servers, no email credentials. Everything runs on GitHub Actions; the only secret is an Anthropic API key.
+No servers, no email credentials. Everything runs on GitHub Actions with an Anthropic API key as the only secret, or on demand from your laptop on a Claude Pro/Max subscription with no API key at all (see [Run it on your Claude subscription](#run-it-on-your-claude-subscription)).
 
 ## How it works
 
@@ -49,6 +49,19 @@ python -m radar add-company "Figma" --tier 1
 
 This probes Greenhouse, Ashby, Lever and SmartRecruiters for a public board under that name and appends the entry to `companies.yaml`. If nothing is found the company is still tracked through the community lists; you can also fill in `ats`, `token`, `workday` or `eightfold` fields by hand (see the comments at the top of `companies.yaml`).
 
+### Run it on your Claude subscription
+
+If you would rather not pay per token, skip the API key and let [Claude Code](https://code.claude.com) do the classification on your Pro or Max plan. Nothing is real time in this mode: a round happens only when you start one.
+
+```bash
+uv venv --python 3.12 && uv pip install -r requirements.txt   # once
+claude                                                          # once, to log in (then /exit)
+./round.sh                                                      # one round: fetch, screen, classify, alert, digest, push
+./round.sh --dry-run                                            # same, but post no issues and commit nothing
+```
+
+Each new posting becomes one headless `claude -p` call with the same system prompt and JSON schema as the API path, so verdicts are identical in shape. The calls draw on your plan's usage limits instead of a bill; if a round hits the limit, the remaining postings simply stay pending for the next one. Keep the two workflows disabled in the Actions tab so the scheduled runs do not compete with your manual rounds, and if your shell exports `ANTHROPIC_API_KEY`, `round.sh` ignores it. Anthropic allows subscription credentials only inside Claude Code itself, which is why this path shells out to the CLI rather than reusing the SDK.
+
 ### Run locally
 
 ```bash
@@ -60,13 +73,14 @@ python -m radar fetch Stripe                # debug one source
 python -m radar stats
 ```
 
-Without an API key the pipeline still fetches, screens and fills the dashboard; postings simply show as "unclassified" until a key is present.
+Without an API key the pipeline picks `claude -p` when the `claude` CLI is installed (`classify.backend: auto`); with neither, it still fetches, screens and fills the dashboard, and postings show as "unclassified" until one is available. `--backend api|claude_code` overrides the config.
 
 ## Schedule and cost
 
 - `radar.yml` runs hourly. During peak season (until `schedule.peak_until` in `config.yaml`) every run does work; afterwards only every `offpeak_every_hours`.
 - `digest.yml` runs at 13:05 and 14:05 UTC and posts only when it is 9am in the configured timezone.
-- Model cost is per new posting, roughly 2,500 input and a few hundred output tokens each. At the default `claude-opus-5` that is about one to two cents per posting; a season of daily new-grad postings runs on the order of a hundred dollars, the first backlog pass about twenty. Set `classify.model` to `claude-haiku-4-5` for roughly a fifth of that.
+- On a Claude subscription (`./round.sh`) there is no per-token cost; rounds count against the plan's usage limits.
+- With an API key, model cost is per new posting, roughly 2,500 input and a few hundred output tokens each. At the default `claude-opus-5` that is about one to two cents per posting; a season of daily new-grad postings runs on the order of a hundred dollars, the first backlog pass about twenty. Set `classify.model` to `claude-haiku-4-5` for roughly a fifth of that.
 - GitHub Actions, Pages and Issues are free for public repositories.
 
 ## Safety notes
@@ -83,11 +97,12 @@ config.yaml           candidate profile, screening rules, schedule
 companies.yaml        watchlist with platform ids and tiers
 radar/sources/        one adapter per platform
 radar/prefilter.py    keyword screen
-radar/classify.py     Claude call with a JSON schema
+radar/classify.py     Claude call with a JSON schema (API key, or `claude -p` on a subscription)
 radar/pipeline.py     run / digest orchestration
 radar/render.py       issue markdown
 docs/                 dashboard (index.html + generated jobs.json)
 data/                 jobs.jsonl state + health.json
+round.sh              one manual round on a Claude subscription
 .github/workflows/    radar.yml (hourly) · digest.yml (daily)
 ```
 
